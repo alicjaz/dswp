@@ -14,5 +14,5 @@ plt.show()
 
 woman = data[data.Gender == "Female"] 
 
-plotting.hist_frame(woman[['Weight','Height','MRI_Count']])
+plotting.hist_frame(woman[['Weight', 'Height', 'MRI_Count']])
 plt.show()

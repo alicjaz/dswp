@@ -10,4 +10,3 @@ print("Dolna granica mediany: ", stats.median_low(data))
 print("Najczęśćiej występująca wartość: ", stats.mode(data))
 print("Wariancja: ", stats.pvariance(data))
 print("Odchylenie standardowe: ", stats.stdev(data))
-

@@ -53,18 +53,12 @@ SELECT
     || ' '
     || e.last_name worker,
     coworkers
-FROM
-         (
-        SELECT
-            e.employee_id,
-            LISTAGG(coworkers.first_name
-                    || ' '
-                    || coworkers.last_name, '; ') WITHIN GROUP(
-            ORDER BY
+FROM (
+        SELECT e.employee_id,  LISTAGG(coworkers.first_name  || ' ' || coworkers.last_name, '; ') WITHIN GROUP
+            (ORDER BY
                 coworkers.last_name
             ) coworkers
-        FROM
-                 employees e
+        FROM employees e
             JOIN employees manager ON manager.employee_id = e.manager_id
             JOIN employees coworkers ON coworkers.manager_id = manager.employee_id
         WHERE

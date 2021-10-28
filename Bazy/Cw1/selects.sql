@@ -1,6 +1,6 @@
 --zadanie 1.
 SELECT 
-CONCAT(last_name, CONCAT(' ', salary)) AS wynagrodzenie
+last_name || ' ' || salary AS wynagrodzenie
 FROM employees
 WHERE (department_id = '20' OR department_id  = '50') AND salary BETWEEN 2000 AND 7000
 ORDER BY last_name ASC;
@@ -48,18 +48,46 @@ LEFT JOIN departments d ON e.department_id = d.department_id
 LEFT JOIN locations l ON d.location_id = l.location_id
 WHERE CITY = 'Toronto';
 --zadanie 7.
-SELECT first_name, last_name 
-FROM employees  
-WHERE department_id IN  
-( SELECT department_id  
-FROM employees  
-WHERE first_name = 'Jennifer')  
-OR first_name =  'Jennifer';
+SELECT
+    e.first_name
+    || ' '
+    || e.last_name worker,
+    coworkers
+FROM
+         (
+        SELECT
+            e.employee_id,
+            LISTAGG(coworkers.first_name
+                    || ' '
+                    || coworkers.last_name, '; ') WITHIN GROUP(
+            ORDER BY
+                coworkers.last_name
+            ) coworkers
+        FROM
+                 employees e
+            JOIN employees manager ON manager.employee_id = e.manager_id
+            JOIN employees coworkers ON coworkers.manager_id = manager.employee_id
+        WHERE
+                e.first_name = 'Jennifer'
+            AND coworkers.employee_id NOT IN e.employee_id
+        GROUP BY
+            e.employee_id
+    ) q
+    JOIN employees e ON e.employee_id = q.employee_id
 --zadanie 8.
 SELECT departments.department_name
 FROM departments 
 WHERE
  NOT EXISTS (SELECT * FROM employees WHERE departments.department_id = employees.department_id)
+--zadanie 9.
+create table job_grades as select * from hr.job_grades
+--zadanie 10.
+SELECT e.first_name || ' '  || e.last_name AS name, e.job_id, d.department_name,
+    e.salary, jg.grade
+FROM employees e
+JOIN departments d ON d.department_id = e.department_id
+LEFT JOIN job_grades  jg ON e.salary
+BETWEEN jg.min_salary AND jg.max_salary WHERE GRADE IS NOT NULL
 --zadanie 11.
 SELECT employee_id, last_name
 FROM employees

@@ -122,3 +122,121 @@ BEGIN
         END IF;
     END LOOP;
 END;
+
+-- task #8 a/b
+--a
+declare
+    cursor emp_cursor(dolny int, gorny int, czesc varchar) is
+    select salary,first_name, last_name
+    from employees
+    where lower(first_name) like (lower(czesc)) and salary between dolny and gorny;
+
+begin
+    for n in emp_cursor(1000,5000,'%a%')  --dla b wystarczy podstawić inne wartości (5000,20000,'%u%')
+    LOOP
+        dbms_output.put_line(n.salary ||' '|| n.first_name ||' '|| n.last_name);
+    end loop;
+end;
+
+--b
+declare
+    cursor emp_cursor(dolny int, gorny int, czesc varchar) is
+    select salary,first_name, last_name
+    from employees
+    where lower(first_name) like (lower(czesc)) and salary between dolny and gorny;
+
+begin
+    for n in emp_cursor(5000,20000,'%u%')
+    LOOP
+        dbms_output.put_line(n.salary ||' '|| n.first_name ||' '|| n.last_name);
+    end loop;
+end;
+
+--task #9
+--a
+create or replace procedure add_jobs(jobid in varchar2,jobname in varchar2) is
+begin
+    insert into jobs(job_id, job_title) values(jobid,jobname);
+exception
+    when others then
+    dbms_output.put_line('Wyjatek jezeli cos nie dziala');
+end;
+--b
+create or replace PROCEDURE change_jobs (
+    jobid   STRING,
+    jobtitle STRING
+) AS
+    not_updated EXCEPTION;
+BEGIN
+    UPDATE jobs
+    SET
+        job_title = jobtitle
+    WHERE
+        job_id = jobid;
+    IF( SQL%rowcount = 0 ) THEN
+        RAISE not_updated;
+    END IF;
+EXCEPTION
+    WHEN not_updated THEN
+        dbms_output.put_line('Nie ma update, error');
+    WHEN OTHERS THEN
+        dbms_output.put_line('Wyjatek jezeli cos nie dziala');
+--c
+create or replace PROCEDURE remove_jobs (
+    jobid STRING
+) AS
+    not_deleted EXCEPTION;
+BEGIN
+    DELETE FROM jobs
+    WHERE
+        job_id = jobid;
+
+    IF ( SQL%rowcount = 0 ) THEN
+        RAISE not_deleted;
+    END IF;
+EXCEPTION
+    WHEN not_deleted THEN
+        dbms_output.put_line('nic nie skasowano error');
+    WHEN OTHERS THEN
+        dbms_output.put_line('nie wiem co ale cos nie dziala');
+END;
+--d
+create or replace PROCEDURE earnings_info (
+    employeeid VARCHAR2
+) IS
+    nazwisko employees.last_name%TYPE;
+    zarobki employees.salary%TYPE;
+BEGIN
+    select employees.last_name, employees.salary into nazwisko, zarobki from employees where(employees.employee_id = employeeid);
+    dbms_output.put_line(nazwisko || ' ' || zarobki);
+END;
+--e
+create or replace procedure insert_earnings(
+zarobki IN number,
+imie IN varchar2 default NULL,
+nazwisko IN varchar2 default 'Kowalski',
+emaj in varchar2 default 'email@email.nl',
+telefon in varchar2 default NULL,
+prowizja in number default NULL,
+managerID number default NULL,
+zatrudnion date default CURRENT_DATE,
+jobid varchar2 default 'HR_REP',
+depart number default 40)
+is
+too_much EXCEPTION;
+idemp employees.employee_id%type;
+BEGIN
+IF (zarobki > 20000) then
+    raise too_much;
+END IF;
+select max(employees.employee_id) into idemp from employees;
+idemp:=idemp+1;
+insert into employees(employee_id,salary, first_name, last_name, email, phone_number,commission_pct,manager_id,hire_date,job_id,department_id) values(idemp,
+zarobki,imie,nazwisko,emaj,telefon,prowizja,
+managerID,zatrudnion,jobid,depart);
+EXCEPTION
+    WHEN too_much THEN
+        dbms_output.put_line('zarobki ponad 20 tysiecy error');
+    WHEN OTHERS THEN
+        dbms_output.put_line('nie wiem co ale cos nie dziala');
+END;
